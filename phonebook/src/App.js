@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import PersonList from './components/Person'
-import axios from 'axios'
+
+import phoneService from './services/people'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -10,17 +11,13 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
 
-  const hook = () => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      setPersons(response.data)
+  useEffect(() =>{
+    phoneService
+    .getAll()
+    .then(initialPeople => {
+      setPersons(initialPeople)
     })
-  } 
-
-  useEffect(hook, [])
-
-  
+  }, [])
 
   const search = (person) => {
 
@@ -31,16 +28,8 @@ const App = () => {
       return person
     } 
   }
-  
-  
-  const mapFunc = (person) => {
-      return(
-      <li key = {person.id} person = {person.name}>{person.name} {person.number}</li>
-      )
-    
-  }
 
-  const addPerson = (event) => {
+  const handleSubmit = (event) => {
   
     event.preventDefault()
     const personObject = {
@@ -49,19 +38,30 @@ const App = () => {
       number: newNumber
     }
 
-    const names = persons.map(person => person.name)
+    const personToChangeNumber = persons.find(p => p.name === newName)
+    const updatedNumber = {...personToChangeNumber, number: newNumber}
 
-    //Loop through names array using "for... in" syntax
-    for (const name in names){
-      if (names[name] === newName){
-          //${newName} format is essentially format string from python -- need backtick
-          return (alert(`${newName} already exists!`))
+    if (personToChangeNumber){
+          if (window.confirm(`${newName} is already added to phonebook, replace old number with a new one?`)){
+            phoneService
+            .update(updatedNumber.id, updatedNumber)
+            .then((returnedPeople) => {
+              setPersons(returnedPeople)
+              setNewName('')
+              setNewNumber('')
+            })     
+          }
       }
-    }
     
-    setNewName('')
-    setNewNumber('') 
-    setPersons(persons.concat(personObject))
+    else {
+      phoneService
+      .create(personObject)
+      .then(returnedPeople => {
+        setPersons(persons.concat(returnedPeople))
+        setNewName('')
+        setNewNumber('')
+      })
+    }
   }
 
   const handleNameChange = (event) => {
@@ -73,17 +73,33 @@ const App = () => {
   }
 
   const handleSearch = (event) => {
-
     setNewSearch(event.target.value)
   }
 
+  //Filter needed to delete entry, as concat will pull error of needing li key of deleted element
+  //Only will delete from frontend after refreshing the page
+  const handleDelete = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)){
+      phoneService
+      .deleteEntry(id)
+      .then(() => {
+        const newList = persons.filter((person) => person.id !== id)
+        setPersons(newList)
+      })
+    }
+  }
+  const filteredResults = !newSearch
+          ? persons
+          : persons.filter(search)
+
+
   return (
-    <div>
+    <div> 
       <h2>Phonebook</h2>
-      <Filter handleSearch = {handleSearch}/>
-      <PersonForm class = "form" addPerson = {addPerson} handleNameChange = {handleNameChange}
+      <Filter handleSearch = {handleSearch} value = {filteredResults}/>
+      <PersonForm class = "form" handleSubmit = {handleSubmit} handleNameChange = {handleNameChange}
         handleNumberChange = {handleNumberChange}/>
-      <PersonList persons = {persons} search = {search} mapFunc = {mapFunc}/>
+      <PersonList persons = {persons} search = {newSearch} deletePerson = {handleDelete}/>
     </div>
   )
 }

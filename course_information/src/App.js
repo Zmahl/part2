@@ -43,6 +43,9 @@ const App = () => {
           exercises: 3,
           id: 1
         },
+
+
+        
         {
           name: 'Middlewares',
           exercises: 7,

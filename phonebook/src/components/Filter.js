@@ -1,16 +1,9 @@
 import React from 'react'
 
-const Filter = ({handleSearch}) => {
+const Filter = ({handleSearch, filteredResults}) => {
     return(
         <div>
-            <input onChange = {(handleSearch) =>{
-                if (handleSearch.length === 0){
-                    return ""
-                }
-                else{
-                    return handleSearch
-                }
-            }}/>
+            <input onChange = {handleSearch} value = {filteredResults}/>
         </div>
     )
 }
