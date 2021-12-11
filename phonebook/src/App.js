@@ -131,7 +131,7 @@ const App = () => {
       <h2>Phonebook</h2>
       <Notification message = {message} errorCheck={errorCheck}/>
       <Filter handleSearch = {handleSearch} value = {filteredResults}/>
-      <PersonForm class = "form" handleSubmit = {handleSubmit} handleNameChange = {handleNameChange}
+      <PersonForm nameVal = {newName} numberVal = {newNumber} class = "form" handleSubmit = {handleSubmit} handleNameChange = {handleNameChange}
         handleNumberChange = {handleNumberChange}/>
       <PersonList persons = {persons} search = {newSearch} deletePerson = {handleDelete}/>
     </div>
