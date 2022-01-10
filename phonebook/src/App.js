@@ -25,7 +25,7 @@ const App = () => {
   const search = (person) => {
 
     if (newSearch === ""){
-      return person
+      return persons
     }
     else if (person.name.toLowerCase().includes(newSearch.toLowerCase())){
       return person
@@ -37,15 +37,14 @@ const App = () => {
     event.preventDefault()
     const personObject = {
       name: newName,
-      id: newName,
       number: newNumber
     }
 
     const personToChangeNumber = persons.find(p => p.name === newName)
-    const updatedNumber = {...personToChangeNumber, number: newNumber}
 
     if (personToChangeNumber){
           if (window.confirm(`${newName} is already added to phonebook, replace old number with a new one?`)){
+            const updatedNumber = {...personToChangeNumber, number: newNumber}
             phoneService
             .update(updatedNumber.id, updatedNumber)
             .then((returnedPeople) => {
@@ -63,6 +62,8 @@ const App = () => {
                 setMessage(null)
               }, 5000)
               setPersons(persons.filter(p => p.name !== newName))
+              setNewName('')
+              setNewNumber('')
             })     
           }
       }
@@ -121,6 +122,7 @@ const App = () => {
       })
     }
   }
+
   const filteredResults = !newSearch
           ? persons
           : persons.filter(search)
